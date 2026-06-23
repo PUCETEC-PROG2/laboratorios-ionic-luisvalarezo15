@@ -1,9 +1,43 @@
-import { IonContent, IonHeader, IonList, IonPage, IonTitle, IonToolbar } from "@ionic/react";
+import React, { useEffect, useState } from "react";
+import {
+  IonContent,
+  IonHeader,
+  IonList,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+} from "@ionic/react";
+
 import RepoItem from "../components/RepoItem";
-import { repositoryList } from "../interfaces/Repository";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { Repository } from "../interfaces/Repository";
+import { fetchRepositories } from "../services/GithubService";
+
 import "./Tab1.css";
 
 const Tab1: React.FC = () => {
+  const [repositoryList, setRepositoryList] = useState<Repository[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchRepos = async () => {
+    try {
+      setLoading(true);
+
+      const repos = await fetchRepositories();
+      console.log("Repositorios recibidos:", repos);
+
+      setRepositoryList(repos);
+    } catch (error) {
+      console.error("Error al obtener repositorios:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRepos();
+  }, []);
+
   return (
     <IonPage>
       <IonHeader>
@@ -11,6 +45,7 @@ const Tab1: React.FC = () => {
           <IonTitle>Repositorios</IonTitle>
         </IonToolbar>
       </IonHeader>
+
       <IonContent fullscreen>
         <IonHeader collapse="condense">
           <IonToolbar>
@@ -18,11 +53,15 @@ const Tab1: React.FC = () => {
           </IonToolbar>
         </IonHeader>
 
-        <IonList>
-          {repositoryList.map((repo) => (
-            <RepoItem key={repo.name} {...repo} />
-          ))}
-        </IonList>
+        {loading ? (
+          <LoadingSpinner />
+        ) : (
+          <IonList>
+            {repositoryList.map((repo) => (
+              <RepoItem key={repo.id} {...repo} />
+            ))}
+          </IonList>
+        )}
       </IonContent>
     </IonPage>
   );
