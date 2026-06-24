@@ -1,42 +1,37 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
-  IonContent,
-  IonHeader,
-  IonList,
-  IonPage,
-  IonTitle,
-  IonToolbar,
+  IonContent, IonHeader, IonList, IonPage, IonTitle, IonToolbar,
+  useIonViewWillEnter,
 } from "@ionic/react";
 
 import RepoItem from "../components/RepoItem";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { Repository } from "../interfaces/Repository";
 import { fetchRepositories } from "../services/GithubService";
-
 import "./Tab1.css";
 
 const Tab1: React.FC = () => {
   const [repositoryList, setRepositoryList] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const fetchRepos = async () => {
     try {
       setLoading(true);
-
+      setErrorMsg("");
       const repos = await fetchRepositories();
-      console.log("Repositorios recibidos:", repos);
-
       setRepositoryList(repos);
     } catch (error) {
-      console.error("Error al obtener repositorios:", error);
+      setErrorMsg(`Error al cargar repositorios: ${(error as Error).message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
+ 
+  useIonViewWillEnter(() => {
     fetchRepos();
-  }, []);
+  });
 
   return (
     <IonPage>
@@ -55,6 +50,8 @@ const Tab1: React.FC = () => {
 
         {loading ? (
           <LoadingSpinner />
+        ) : errorMsg ? (
+          <p style={{ padding: "1rem", color: "var(--ion-color-danger)" }}>{errorMsg}</p>
         ) : (
           <IonList>
             {repositoryList.map((repo) => (
