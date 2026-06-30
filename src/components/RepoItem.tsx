@@ -4,7 +4,12 @@ import "./RepoItem.css";
 import React from "react";
 import { pencil, trash } from "ionicons/icons";
 
-const RepoItem: React.FC<Repository> = (repository) => {
+interface RepoItemProps extends Repository {
+  full_name: string; 
+  onDelete: (fullName: string) => void;
+  onEdit: (repo: Repository & { full_name: string }) => void; 
+}
+const RepoItem: React.FC<RepoItemProps> = (repository) => {
   return (
     <IonItemSliding>
       <IonItem>
@@ -20,10 +25,10 @@ const RepoItem: React.FC<Repository> = (repository) => {
         </IonLabel>
       </IonItem>
       <IonItemOptions>
-        <IonItemOption>
+        <IonItemOption color="primary" onClick={() => repository.onEdit(repository)}>
           <IonIcon icon={pencil} slot="icon-only" />
         </IonItemOption>
-        <IonItemOption color="danger">
+        <IonItemOption color="danger" onClick={() => repository.onDelete(repository.full_name)}>
           <IonIcon icon={trash} slot="icon-only" />
         </IonItemOption>
       </IonItemOptions>
